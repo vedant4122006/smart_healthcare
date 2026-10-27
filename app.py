@@ -24,7 +24,13 @@ load_dotenv()
 
 # App config
 app = Flask(__name__, static_folder="static", template_folder="templates")
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "devkey")
+
+# Secure SECRET_KEY loading (fixes SEC-01)
+secret_key = os.getenv("SECRET_KEY")
+if not secret_key:
+    secret_key = os.urandom(24).hex()
+app.config["SECRET_KEY"] = secret_key
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -562,4 +568,5 @@ def emergency():
 
 # -------------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    debug_mode = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
+    app.run(debug=debug_mode, host="127.0.0.1", port=5000)
