@@ -5,44 +5,58 @@
   <title>Smart Healthcare</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-  <!-- Simple CSS styling -->
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       margin: 0;
       background-color: #f8f9fa;
       color: #333;
+      top: 0px !important;
     }
-
     nav {
       background: #007bff;
-      padding: 12px 20px;
+      padding: 12px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
     }
-
+    nav .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    nav .back-btn {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.4);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    nav .back-btn:hover {
+      background: rgba(255,255,255,0.35);
+    }
     nav .brand {
       font-size: 20px;
       font-weight: bold;
       color: #fff;
       text-decoration: none;
     }
-
     nav .links a {
       color: #fff;
-      margin-left: 20px;
+      margin-left: 18px;
       text-decoration: none;
-      font-size: 16px;
+      font-size: 15px;
+      font-weight: 500;
       transition: color 0.2s;
     }
-
     nav .links a:hover {
       color: #ffd700;
     }
-
     .container {
       max-width: 900px;
       margin: 30px auto;
@@ -51,26 +65,33 @@
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
-    /* Hide default Google Translate widget UI */
-    .goog-logo-link, .goog-te-gadget {
+    .goog-logo-link, .goog-te-gadget, .goog-te-banner-frame.skiptranslate {
       display: none !important;
-    }
-    .goog-te-banner-frame.skiptranslate {
-      display: none !important;
-    }
-    body {
-      top: 0px !important;
     }
   </style>
 </head>
 <body>
   <nav>
-    <a href="{{ url_for('language_selection') }}" class="brand">🏥 Smart Healthcare</a>
+    <div class="brand-group">
+      <a href="javascript:history.back()" class="back-btn">⬅ Back</a>
+      <a href="{{ url_for('language_selection') }}" class="brand">🏥 Smart Healthcare</a>
+    </div>
     <div class="links">
-      <a href="{{ url_for('hospital_list') }}">All Hospitals</a>
+      <a href="{{ url_for('hospital_list') }}">🏥 All Hospitals</a>
+      <a href="{{ url_for('emergency') }}">🚨 Emergency SOS</a>
+      {% if session.get('user_role') == 'patient' %}
+        <a href="{{ url_for('patient_symptoms') }}">🩺 Symptom Search</a>
+      {% elif session.get('user_role') == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}">⚙️ Admin Panel</a>
+      {% elif session.get('user_role') == 'driver' %}
+        <a href="{{ url_for('driver_dashboard') }}">🚑 Driver Panel</a>
+      {% elif session.get('user_role') == 'doctor' %}
+        <a href="{{ url_for('doctor_dashboard') }}">👨‍⚕️ Doctor Panel</a>
+      {% else %}
+        <a href="{{ url_for('login_choice') }}">🔑 Login</a>
+      {% endif %}
       {% if session.get('user_email') %}
-        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('logout') }}">🚪 Logout</a>
       {% endif %}
     </div>
   </nav>
@@ -79,20 +100,17 @@
     {% block content %}{% endblock %}
   </div>
 
-  <!-- Hidden Google Translate -->
   <div id="google_translate_element" style="display:none;"></div>
   <script type="text/javascript">
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
         pageLanguage: 'en',
-        includedLanguages: 'en,hi,mr', // add more like 'ta,bn,te,gu,kn'
+        includedLanguages: 'en,hi,mr',
         autoDisplay: false
       }, 'google_translate_element');
     }
-
-    // Apply translation automatically based on saved session language
     document.addEventListener("DOMContentLoaded", function () {
-      let selectedLang = "{{ session.get('language', 'en') }}";  
+      let selectedLang = "{{ session.get('language', 'en') }}";
       if (selectedLang !== "en") {
         setTimeout(() => {
           let iframe = document.querySelector("iframe.goog-te-menu-frame");
@@ -105,7 +123,7 @@
               }
             });
           }
-        }, 1500); // wait until widget loads
+        }, 1500);
       }
     });
   </script>

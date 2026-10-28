@@ -213,34 +213,41 @@ SYMPTOM_KEYWORDS = {
     # -------------------
     # General / Family Medicine
     # -------------------
-    "fever": ["General", "SuperSpecialist"],
-    "weakness": ["General", "SuperSpecialist"],
-    "body ache": ["General", "SuperSpecialist"],
-    "fatigue": ["General", "SuperSpecialist"],
-    "cold": ["General", "SuperSpecialist"],
-    "flu": ["General", "SuperSpecialist"],
-    "injury": ["General", "SuperSpecialist"],
-    "head cold": ["General", "SuperSpecialist"],
-    "general checkup": ["General", "SuperSpecialist"],
+    "fever": ["Multispeciality", "SuperSpecialist"],
+    "weakness": ["Multispeciality", "SuperSpecialist"],
+    "body ache": ["Multispeciality", "SuperSpecialist"],
+    "fatigue": ["Multispeciality", "SuperSpecialist"],
+    "cold": ["Multispeciality", "SuperSpecialist"],
+    "flu": ["Multispeciality", "SuperSpecialist"],
+    "injury": ["Multispeciality", "SuperSpecialist"],
+    "head cold": ["Multispeciality", "SuperSpecialist"],
+    "general checkup": ["Multispeciality", "SuperSpecialist"],
 }
 
 def match_specialty(description: str):
     """
     Map patient description to closest matching specialty.
-    Uses fuzzy matching with similarity scores.
-    Returns a list of specializations.
+    1. Checks for exact keyword substring matches first (handles full sentences).
+    2. Falls back to fuzzy matching for typos with a strict threshold (>= 75).
     """
     description = description.lower().strip()
+    if not description:
+        return ["Multispeciality", "SuperSpecialist"]
 
+    # 1. Direct substring check (longest keyword first so "fever in child" beats "fever")
+    for keyword in sorted(SYMPTOM_KEYWORDS.keys(), key=len, reverse=True):
+        if keyword in description:
+            return SYMPTOM_KEYWORDS[keyword]
+
+    # 2. Fuzzy match fallback for typos
     best_match, score, _ = process.extractOne(
         description,
         SYMPTOM_KEYWORDS.keys(),
-        scorer=fuzz.token_sort_ratio
+        scorer=fuzz.WRatio
     )
 
     print(f"[DEBUG] Input: '{description}' | Best Match: '{best_match}' | Score: {score}")
 
-    if score >= 40:
+    if score >= 75:
         return SYMPTOM_KEYWORDS[best_match]
-    else:
-        return ["General", "SuperSpecialist"]
+    return ["Multispeciality", "SuperSpecialist"]

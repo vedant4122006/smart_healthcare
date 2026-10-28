@@ -1,13 +1,12 @@
 # app.py
 import os
+import re
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from geopy.distance import geodesic
-import re # Added for the parse_coord function
 
 # Services
-from services.ai_recommender import analyze_symptoms
 from services.symptom_mapping import match_specialty
 from services.notifications import send_email_notification
 
@@ -40,39 +39,35 @@ with app.app_context():
     db.create_all()
 
 # -------------------------------
-# UTILITY FUNCTIONS (NEW)
+# UTILITY FUNCTIONS
 # -------------------------------
 def parse_coord(val):
     """
-    Robustly parse many coordinate string formats into a float.
-    Returns float or None.
-    Examples handled:
-      "20.93", "20.93 N", "20.93° N", "20.930743", "20.93°N", "20.93 N, 77.7 E"
+    Robustly parse coordinate strings or numbers into a float.
+    Correctly handles South (S) and West (W) as negative coordinates.
     """
     if val is None:
         return None
     if isinstance(val, (float, int)):
         return float(val)
     s = str(val).strip()
-    # quick empty check
-    if s == "":
+    if not s:
         return None
-    # remove degree/minute/second symbols and direction letters & commas
-    s = s.replace('°',' ').replace('º',' ').replace("'", " ").replace('"', " ")
-    s = re.sub(r'[NSEWnsew,]', '', s)
-    # remove any remaining non-numeric (except +,- and .)
-    # but first replace comma decimals (if exist) with dot (rare)
-    s = s.replace(',', '.')
-    # strip spaces
-    s = re.sub(r'\s+', '', s)
-    # extract first numeric token
-    m = re.search(r'[-+]?\d+\.\d+|[-+]?\d+', s)
+
+    is_negative = bool(re.search(r'[SWsw]', s))
+    s = s.replace('°', ' ').replace('º', ' ').replace("'", " ").replace('"', " ")
+    s = re.sub(r'[NSEWnsew,]', ' ', s)
+    m = re.search(r'[-+]?\d+(?:\.\d+)?', s)
     if not m:
         return None
     try:
-        return float(m.group())
-    except:
+        coord = float(m.group())
+        if is_negative and coord > 0:
+            coord = -coord
+        return coord
+    except ValueError:
         return None
+
 # -------------------------------
 # Basic site routes
 # -------------------------------
@@ -277,8 +272,7 @@ def login_admin():
         password = request.form.get("password", "")
 
         admin = Admin.query.filter_by(email=email).first()
-        # NOTE: Assuming Admin model has check_password method
-        if admin and admin.check_password(password): 
+        if admin and admin.check_password(password):
             session["user_role"] = "admin"
             session["user_email"] = admin.email
             flash("Logged in as Admin", "success")
@@ -315,7 +309,6 @@ def add_hospital():
         name = request.form.get("name")
         specialization = request.form.get("specialization")
         machines = request.form.get("machines")
-        # Use the robust parser for admin input as well
         latitude = parse_coord(request.form.get("latitude"))
         longitude = parse_coord(request.form.get("longitude"))
 
@@ -344,8 +337,7 @@ def edit_hospital(hospital_id):
         hospital.name = request.form.get("name")
         hospital.specialization = request.form.get("specialization")
         hospital.machines = request.form.get("machines")
-        
-        # Use the robust parser
+
         latitude = parse_coord(request.form.get("latitude"))
         longitude = parse_coord(request.form.get("longitude"))
 
@@ -379,8 +371,7 @@ def delete_hospital(hospital_id):
 # -------------------------------
 @app.route("/api/send-sos", methods=["POST"])
 def api_send_sos():
-    data = request.json or request.form
-    # Use the robust parser for coordinates
+    data = request.json or request.form or {}
     lat = parse_coord(data.get("lat"))
     lon = parse_coord(data.get("lon"))
 
@@ -389,10 +380,8 @@ def api_send_sos():
 
     driver = Driver.query.filter_by(is_available=True).first()
     if not driver:
-        return jsonify({"ok": False, "msg": "No available driver"})
+        return jsonify({"ok": False, "msg": "No available driver right now"})
 
-    # Ensure driver coordinates are valid if you plan to use them (though not in original logic)
-    # location_url uses the original patient lat/lon
     location_url = f"https://www.openstreetmap.org/?mlat={lat}&mlon={lon}&zoom=15"
     subject = "🚨 SOS Alert"
     body = f"A patient needs urgent help!\n\nLocation: {location_url}\n\nDriver Contact: {driver.phone}"
@@ -404,14 +393,13 @@ def api_send_sos():
         return jsonify({"ok": False, "msg": "Failed to send email"})
 
 # -------------------------------
-# Patient Symptom Input (UPDATED)
+# Patient Symptom Input
 # -------------------------------
 @app.route('/patient/symptoms', methods=['GET', 'POST'])
 def patient_symptoms():
     if request.method == 'POST':
         symptoms = request.form.get('symptoms', '').strip()
-        
-        # Accept lat/lon from form (hidden inputs filled by JS) OR manual inputs
+
         lat = request.form.get('lat') or request.form.get('latitude') or request.form.get('patient_lat')
         lon = request.form.get('lon') or request.form.get('longitude') or request.form.get('patient_lon')
 
@@ -419,42 +407,34 @@ def patient_symptoms():
         plon = parse_coord(lon)
 
         if plat is not None and plon is not None:
-            # Save valid coords to session (NEW)
             session['patient_lat'] = plat
             session['patient_lon'] = plon
             current_app.logger.debug("Saved patient location: %s, %s", plat, plon)
         else:
-            # Clear stored location if invalid (NEW)
             session.pop('patient_lat', None)
             session.pop('patient_lon', None)
             flash("Note: We couldn't get your location, so distances won't be calculated.", "info")
 
-        # Map symptoms -> specialization
-        specialization = match_specialty(symptoms)
+        matched_specs = match_specialty(symptoms)
+        primary_spec = matched_specs[0] if isinstance(matched_specs, list) and matched_specs else str(matched_specs)
 
-        # Redirect to recommendation page (using query params, NOT POST)
-        return redirect(url_for('recommend', specialization=specialization, symptoms=symptoms))
+        return redirect(url_for('recommend', specialization=primary_spec, symptoms=symptoms))
     return render_template('patient_symptoms.html')
 
 # -------------------------------
-# Recommendation Route (UPDATED/REPLACED)
+# Recommendation Route
 # -------------------------------
 @app.route('/recommend')
 def recommend():
     specialization = request.args.get('specialization', '').strip()
     symptoms = request.args.get('symptoms', '').strip()
 
-    # Get patient coords: session preferred, fallback to query params
     plat = parse_coord(session.get('patient_lat')) or parse_coord(request.args.get('lat'))
     plon = parse_coord(session.get('patient_lon')) or parse_coord(request.args.get('lon'))
 
-    # Query hospitals (if specialization empty, return all)
     query = Hospital.query
     if specialization:
-        query = query.filter(
-            (Hospital.specialization.ilike(f"%{specialization}%")) |
-            (Hospital.machines.ilike(f"%{specialization}%"))
-        )
+        query = query.filter(Hospital.specialization.ilike(f"%{specialization}%"))
     hospitals = query.all()
 
     results = []
@@ -463,12 +443,11 @@ def recommend():
         hlon = parse_coord(h.longitude)
 
         distance_km = None
-        # Calculate distance only if all 4 coordinates are valid
         if plat is not None and plon is not None and hlat is not None and hlon is not None:
             try:
                 distance_km = geodesic((plat, plon), (hlat, hlon)).km
             except Exception as e:
-                current_app.logger.warning("Distance calc failed for hospital %s: %s", getattr(h,'id',None), str(e))
+                current_app.logger.warning("Distance calc failed for hospital %s: %s", getattr(h, 'id', None), str(e))
                 distance_km = None
 
         results.append({
@@ -481,7 +460,6 @@ def recommend():
             "distance": round(distance_km, 2) if distance_km is not None else None
         })
 
-    # Sort: None distances go to the end
     results_sorted = sorted(results, key=lambda x: x['distance'] if x['distance'] is not None else float('inf'))
 
     return render_template('recommend.html',
@@ -492,41 +470,37 @@ def recommend():
                            patient_lon=plon)
 
 # -------------------------------
-# HOSPITAL LIST + MAP (UPDATED hospital_list and map_view)
+# HOSPITAL LIST + MAP
 # -------------------------------
 @app.route("/hospitals")
 def hospital_list():
-    # Use the robust parser on session data
     patient_lat = parse_coord(session.get("patient_lat"))
     patient_lon = parse_coord(session.get("patient_lon"))
     hospitals = Hospital.query.all()
 
     hospitals_with_distance = []
     for h in hospitals:
-        # Use robust parser for hospital coords
         hlat = parse_coord(h.latitude)
         hlon = parse_coord(h.longitude)
-        
-        h_dict = h.__dict__ # Use dict for easy modification
-        h_dict["distance"] = None
 
+        distance_km = None
         if patient_lat is not None and patient_lon is not None and hlat is not None and hlon is not None:
             try:
-                distance_km = geodesic((patient_lat, patient_lon), (hlat, hlon)).km
-                h_dict["distance"] = round(distance_km, 2)
-            except:
-                pass # distance remains None
+                distance_km = round(geodesic((patient_lat, patient_lon), (hlat, hlon)).km, 2)
+            except Exception:
+                distance_km = None
 
-        hospitals_with_distance.append(h_dict)
+        hospitals_with_distance.append({
+            "id": h.id,
+            "name": h.name,
+            "specialization": h.specialization,
+            "machines": h.machines,
+            "latitude": hlat,
+            "longitude": hlon,
+            "distance": distance_km
+        })
 
-
-    # Sort: None distances go to the end
     hospitals_sorted = sorted(hospitals_with_distance, key=lambda x: x['distance'] if x['distance'] is not None else float('inf'))
-    
-    # Note: If you want to use the SQLAlchemy objects directly instead of dicts, 
-    # you'd need to ensure 'distance' is a transient property or use a structure like 'results' in /recommend.
-    # For simplicity, returning the sorted list of dicts.
-
     return render_template("hospital_list.html", hospitals=hospitals_sorted)
 
 @app.route("/hospital/<int:hospital_id>")
@@ -538,22 +512,19 @@ def hospital_detail(hospital_id):
 def map_view(hospital_id):
     hospital = Hospital.query.get_or_404(hospital_id)
 
-    # 1. Allow overriding session via URL query
     qlat = request.args.get('lat')
     qlon = request.args.get('lon')
-    
+
     if qlat and qlon:
         plat = parse_coord(qlat)
         plon = parse_coord(qlon)
         if plat is not None and plon is not None:
-            # Optionally save to session if coming from a specific link
             session['patient_lat'] = plat
             session['patient_lon'] = plon
-        
-    # 2. Get the final patient coordinates from the session
+
     patient_lat = parse_coord(session.get('patient_lat'))
     patient_lon = parse_coord(session.get('patient_lon'))
-    
+
     return render_template(
         "map_view.html",
         hospital=hospital,

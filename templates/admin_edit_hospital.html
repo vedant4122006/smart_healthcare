@@ -101,12 +101,13 @@
     </style>
 </head>
 <body>
+<div class="admin-nav-links" style="background:#0056b3; padding:10px 20px; text-align:center;"><a href="javascript:history.back()" style="color:#fff; margin:0 15px; text-decoration:none; font-weight:bold;">⬅ Back</a><a href="/admin/dashboard" style="color:#fff; margin:0 15px; text-decoration:none; font-weight:bold;">🏠 Dashboard</a><a href="/admin/hospitals" style="color:#fff; margin:0 15px; text-decoration:none; font-weight:bold;">🏥 Manage Hospitals</a><a href="/" style="color:#fff; margin:0 15px; text-decoration:none; font-weight:bold;">🌐 Main Site</a><a href="/logout" style="color:#ffd700; margin:0 15px; text-decoration:none; font-weight:bold;">🚪 Logout</a></div>
     <header>
         <h1>Smart Healthcare - Admin Panel</h1>
     </header>
 
     <div class="container">
-        <h2>✏️ Edit Hospital</h2>
+        <h2>âœï¸ Edit Hospital</h2>
 
         <form method="POST">
             <label>Name:</label>
@@ -118,8 +119,8 @@
                 <option value="Cardiology">
                 <option value="Neurology">
                 <option value="Orthopedics">
-                <option value="General">
-                <option value="Gynaecology">
+                <option value="Multispeciality">
+                <option value="Gynecology">
                 <option value="ENT">
                 <option value="Dermatology">
                 <option value="Oncology">
@@ -152,9 +153,9 @@
             <input type="number" step="any" id="longitude" name="longitude" value="{{ hospital.longitude }}" required>
 
             <div class="buttons">
-                <button type="submit">💾 Save Changes</button>
+                <button type="submit">ðŸ’¾ Save Changes</button>
                 <a href="{{ url_for('admin_hospitals') }}">
-                    <button type="button" class="cancel-btn">❌ Cancel</button>
+                    <button type="button" class="cancel-btn">âŒ Cancel</button>
                 </a>
             </div>
         </form>

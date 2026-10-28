@@ -63,6 +63,7 @@
     </style>
 </head>
 <body>
+<div class="admin-nav-links" style="background:#0056b3; padding:10px 20px; text-align:center;"><a href="javascript:history.back()" style="color:#fff; margin:0 15px; text-decoration:none; font-weight:bold;">⬅ Back</a><a href="/admin/dashboard" style="color:#fff; margin:0 15px; text-decoration:none; font-weight:bold;">🏠 Dashboard</a><a href="/admin/hospitals" style="color:#fff; margin:0 15px; text-decoration:none; font-weight:bold;">🏥 Manage Hospitals</a><a href="/" style="color:#fff; margin:0 15px; text-decoration:none; font-weight:bold;">🌐 Main Site</a><a href="/logout" style="color:#ffd700; margin:0 15px; text-decoration:none; font-weight:bold;">🚪 Logout</a></div>
     <div class="container">
         <h2>Add New Hospital</h2>
 
@@ -78,8 +79,8 @@
                 <option value="Cardiology">
                 <option value="Neurology">
                 <option value="Orthopedics">
-                <option value="General Medicine">
-                <option value="Gynaecology">
+                <option value="Multispeciality">
+                <option value="Gynecology">
                 <option value="ENT">
                 <option value="Dermatology">
                 <option value="Pediatrics">
@@ -92,7 +93,7 @@
                 <option value="Psychiatry">
                 <option value="Rheumatology">
                 <option value="Ophthalmology">
-                <option value="Dental">
+                <option value="Dentistry">
                 <option value="Emergency & Trauma">
                 <option value="Rehabilitation">
             </datalist>
@@ -128,7 +129,7 @@
             <label>Longitude:</label>
             <input type="number" step="any" id="longitude" name="longitude" required>
 
-            <button type="submit">➕ Add Hospital</button>
+            <button type="submit">âž• Add Hospital</button>
         </form>
     </div>
 
@@ -144,7 +145,7 @@
 
         var marker;
 
-        // Click on map → update lat/lon inputs
+        // Click on map â†’ update lat/lon inputs
         map.on('click', function(e) {
             var lat = e.latlng.lat.toFixed(6);
             var lon = e.latlng.lng.toFixed(6);
@@ -159,7 +160,7 @@
             }
         });
 
-        // If user types lat/lon manually → update map marker
+        // If user types lat/lon manually â†’ update map marker
         function updateMapFromInputs() {
             var lat = parseFloat(document.getElementById('latitude').value);
             var lon = parseFloat(document.getElementById('longitude').value);

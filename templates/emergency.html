@@ -2,14 +2,14 @@
 {% block content %}
 <div class="sos-wrapper">
   <div class="sos-card">
-    <h1>🚨 Emergency SOS</h1>
+    <h1>ðŸš¨ Emergency SOS</h1>
     <p class="subtext">
       Your live location will be detected automatically.  
       Click the button below to immediately alert the nearest ambulance driver.
     </p>
 
     <!-- SOS Button -->
-    <button class="sos-btn" onclick="sendSOS()">🚑 Send SOS Now</button>
+    <button class="sos-btn" onclick="sendSOS()">ðŸš‘ Send SOS Now</button>
 
     <!-- Status Message -->
     <p id="statusMsg" class="status-msg"></p>
@@ -33,7 +33,7 @@
       }).addTo(map);
 
       marker = L.marker([lat, lon]).addTo(map)
-        .bindPopup("📍 Your Location")
+        .bindPopup("ðŸ“ Your Location")
         .openPopup();
     } else {
       map.setView([lat, lon], 15);
@@ -48,33 +48,37 @@
       currentLon = position.coords.longitude;
       initMap(currentLat, currentLon);
     }, function() {
-      document.getElementById("statusMsg").innerText = "⚠️ Unable to detect location.";
+      document.getElementById("statusMsg").innerText = "âš ï¸ Unable to detect location.";
     });
   } else {
-    document.getElementById("statusMsg").innerText = "❌ Geolocation not supported.";
+    document.getElementById("statusMsg").innerText = "âŒ Geolocation not supported.";
   }
 
   // Send SOS request
   function sendSOS() {
     if (!currentLat || !currentLon) {
-      document.getElementById("statusMsg").innerText = "⚠️ Location not available.";
+      document.getElementById("statusMsg").innerText = "âš ï¸ Location not available.";
       return;
     }
 
-    document.getElementById("statusMsg").innerText = "📡 Sending SOS...";
+    document.getElementById("statusMsg").innerText = "ðŸ“¡ Sending SOS...";
 
     fetch("/api/send-sos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ lat: currentLat, lon: currentLon })
     })
-    .then(res => res.text()) // backend returns HTML
-    .then(html => {
-      document.open();
-      document.write(html);
-      document.close();
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok) {
+        document.getElementById("statusMsg").innerText = "✅ SOS sent to ambulance driver (" + data.to + ")!";
+        alert("✅ SOS Alert Dispatched Successfully to " + data.to);
+      } else {
+        document.getElementById("statusMsg").innerText = "❌ Failed: " + data.msg;
+        alert("⚠️ Could not send SOS: " + data.msg);
+      }
     })
-    .catch(err => alert("❌ Error: " + err));
+    .catch(err => alert("âŒ Error: " + err));
   }
 </script>
 
@@ -162,3 +166,4 @@
   }
 </style>
 {% endblock %}
+
