@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="doctor-dashboard">
-  <h1>👨‍⚕️ Doctor Dashboard</h1>
+  <h1>Doctor Dashboard</h1>
 
   <div class="doctor-card">
     <h2>{{ doctor.name }}</h2>
@@ -10,7 +10,7 @@
   </div>
 
   <div class="actions">
-    <a href="{{ url_for('logout') }}" class="btn-logout">🚪 Logout</a>
+    <a href="{{ url_for('logout') }}" class="btn-logout"> Logout</a>
   </div>
 </div>
 

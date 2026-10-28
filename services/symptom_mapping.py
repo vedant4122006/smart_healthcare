@@ -1,6 +1,36 @@
+import re
 from rapidfuzz import fuzz, process
 
 SYMPTOM_KEYWORDS = {
+    'stomach': ['Gastroenterology', 'SuperSpecialist'],
+    'abdomen': ['Gastroenterology', 'SuperSpecialist'],
+    'belly': ['Gastroenterology', 'SuperSpecialist'],
+    'heart': ['Cardiology', 'SuperSpecialist'],
+    'chest': ['Cardiology', 'SuperSpecialist'],
+    'brain': ['Neurology', 'SuperSpecialist'],
+    'nerve': ['Neurology', 'SuperSpecialist'],
+    'lungs': ['Pulmonology', 'SuperSpecialist'],
+    'breathing': ['Pulmonology', 'SuperSpecialist'],
+    'bone': ['Orthopedics', 'SuperSpecialist'],
+    'knee': ['Orthopedics', 'SuperSpecialist'],
+    'shoulder': ['Orthopedics', 'SuperSpecialist'],
+    'ear': ['ENT', 'SuperSpecialist'],
+    'nose': ['ENT', 'SuperSpecialist'],
+    'throat': ['ENT', 'SuperSpecialist'],
+    'skin': ['Dermatology', 'SuperSpecialist'],
+    'eye': ['Ophthalmology', 'SuperSpecialist'],
+    'vision': ['Ophthalmology', 'SuperSpecialist'],
+    'pregnancy': ['Gynecology', 'SuperSpecialist'],
+    'child': ['Pediatrics', 'SuperSpecialist'],
+    'baby': ['Pediatrics', 'SuperSpecialist'],
+    'kidney': ['Nephrology', 'SuperSpecialist'],
+    'urine': ['Urology', 'SuperSpecialist'],
+    'thyroid': ['Endocrinology', 'SuperSpecialist'],
+    'cancer': ['Oncology', 'SuperSpecialist'],
+    'tooth': ['Dentistry', 'SuperSpecialist'],
+    'teeth': ['Dentistry', 'SuperSpecialist'],
+    'dental': ['Dentistry', 'SuperSpecialist'],
+
     # -------------------
     # Cardiology
     # -------------------
@@ -225,29 +255,28 @@ SYMPTOM_KEYWORDS = {
 }
 
 def match_specialty(description: str):
-    """
-    Map patient description to closest matching specialty.
-    1. Checks for exact keyword substring matches first (handles full sentences).
-    2. Falls back to fuzzy matching for typos with a strict threshold (>= 75).
-    """
     description = description.lower().strip()
     if not description:
         return ["Multispeciality", "SuperSpecialist"]
 
-    # 1. Direct substring check (longest keyword first so "fever in child" beats "fever")
+    # 1. Direct phrase/word check (longest keyword first)
     for keyword in sorted(SYMPTOM_KEYWORDS.keys(), key=len, reverse=True):
-        if keyword in description:
+        if re.search(r'\b' + re.escape(keyword) + r'\b', description):
             return SYMPTOM_KEYWORDS[keyword]
 
-    # 2. Fuzzy match fallback for typos
+    # 2. Strip common conversational stopwords before fuzzy matching
+    stopwords = {"i", "am", "not", "feeling", "good", "well", "in", "my", "the", "a", "an", "having", "have", "severe", "very", "bad", "some", "of", "from", "since", "feel", "like"}
+    tokens = [w for w in re.findall(r"[a-z]+", description) if w not in stopwords]
+    cleaned = " ".join(tokens)
+    if not cleaned:
+        return ["Multispeciality", "SuperSpecialist"]
+
     best_match, score, _ = process.extractOne(
-        description,
+        cleaned,
         SYMPTOM_KEYWORDS.keys(),
-        scorer=fuzz.WRatio
+        scorer=fuzz.token_set_ratio
     )
-
-    print(f"[DEBUG] Input: '{description}' | Best Match: '{best_match}' | Score: {score}")
-
+    print(f"[DEBUG] Input: '{description}' | Cleaned: '{cleaned}' | Best Match: '{best_match}' | Score: {score}")
     if score >= 75:
         return SYMPTOM_KEYWORDS[best_match]
     return ["Multispeciality", "SuperSpecialist"]

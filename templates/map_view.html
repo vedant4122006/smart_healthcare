@@ -44,7 +44,7 @@
           iconSize: [32, 32]
         })
       }).addTo(map)
-        .bindPopup("🏠 Patient Location");
+        .bindPopup(" Patient Location");
 
       // Route (polyline)
       var latlngs = [
@@ -60,7 +60,7 @@
       map.fitBounds(polyline.getBounds());
 
       // Show distance on click
-      polyline.bindPopup("📏 Distance: " +
+      polyline.bindPopup(" Distance: " +
         map.distance([patientLat, patientLon], [hospitalLat, hospitalLon]).toFixed(0) +
         " meters");
     }
@@ -69,7 +69,7 @@
     map.on('click', function(e) {
       L.popup()
         .setLatLng(e.latlng)
-        .setContent("📍 You clicked at " + e.latlng.lat.toFixed(5) + ", " + e.latlng.lng.toFixed(5))
+        .setContent(" You clicked at " + e.latlng.lat.toFixed(5) + ", " + e.latlng.lng.toFixed(5))
         .openOn(map);
     });
   </script>

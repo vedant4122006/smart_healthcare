@@ -73,25 +73,25 @@
 <body>
   <nav>
     <div class="brand-group">
-      <a href="javascript:history.back()" class="back-btn">⬅ Back</a>
-      <a href="{{ url_for('language_selection') }}" class="brand">🏥 Smart Healthcare</a>
+      <a href="#" onclick="if(window.history.length > 1){window.history.back();}else{window.location.href='/';} return false;" class="back-btn">⬅ Back</a>
+      <a href="{{ url_for('language_selection') }}" class="brand"> Smart Healthcare</a>
     </div>
     <div class="links">
-      <a href="{{ url_for('hospital_list') }}">🏥 All Hospitals</a>
-      <a href="{{ url_for('emergency') }}">🚨 Emergency SOS</a>
+      <a href="{{ url_for('hospital_list') }}"> All Hospitals</a>
+      <a href="{{ url_for('emergency') }}"> Emergency SOS</a>
       {% if session.get('user_role') == 'patient' %}
-        <a href="{{ url_for('patient_symptoms') }}">🩺 Symptom Search</a>
+        <a href="{{ url_for('patient_symptoms') }}"> Symptom Search</a>
       {% elif session.get('user_role') == 'admin' %}
-        <a href="{{ url_for('admin_dashboard') }}">⚙️ Admin Panel</a>
+        <a href="{{ url_for('admin_dashboard') }}"> Admin Panel</a>
       {% elif session.get('user_role') == 'driver' %}
-        <a href="{{ url_for('driver_dashboard') }}">🚑 Driver Panel</a>
+        <a href="{{ url_for('driver_dashboard') }}"> Driver Panel</a>
       {% elif session.get('user_role') == 'doctor' %}
-        <a href="{{ url_for('doctor_dashboard') }}">👨‍⚕️ Doctor Panel</a>
+        <a href="{{ url_for('doctor_dashboard') }}"> Doctor Panel</a>
       {% else %}
-        <a href="{{ url_for('login_choice') }}">🔑 Login</a>
+        <a href="{{ url_for('login_choice') }}"> Login</a>
       {% endif %}
       {% if session.get('user_email') %}
-        <a href="{{ url_for('logout') }}">🚪 Logout</a>
+        <a href="{{ url_for('logout') }}"> Logout</a>
       {% endif %}
     </div>
   </nav>

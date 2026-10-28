@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="login-choice">
-  <h1>🔐 Login As</h1>
+  <h1>Login As</h1>
 
   <div class="login-options">
     <a href="{{ url_for('login_patient') }}" class="login-card patient">
-      👤 Patient
+       Patient
     </a>
     <a href="{{ url_for('login_doctor') }}" class="login-card doctor">
-      👨‍⚕️ Doctor
+       Doctor
     </a>
     <a href="{{ url_for('login_driver') }}" class="login-card driver">
-      🚑 Ambulance Driver
+       Ambulance Driver
     </a>
     <a href="{{ url_for('login_admin') }}" class="login-card admin">
-      🛡️ Admin
+       Admin
     </a>
   </div>
 </div>

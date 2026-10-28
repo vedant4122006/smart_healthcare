@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="language-container">
-  <h1>🌐 Choose Your Language</h1>
+  <h1>Choose Your Language</h1>
 
   <div class="lang-buttons">
     <a href="{{ url_for('set_language', lang='en') }}"><button>English</button></a>
@@ -9,8 +9,8 @@
     <a href="{{ url_for('set_language', lang='mr') }}"><button>मराठी</button></a>
   </div>
 
-  <h2 class="emergency-title">🚨 Emergency?</h2>
-  <button onclick="sendSOS()" class="sos-btn">🚑 Send SOS</button>
+  <h2 class="emergency-title">Emergency?</h2>
+  <button onclick="sendSOS()" class="sos-btn"> Send SOS</button>
   <p class="sos-subtext">Instantly alert the nearest ambulance driver with your live location</p>
 </div>
 
@@ -29,12 +29,12 @@
         .then(res => res.json())
         .then(data => {
           if (data.ok) {
-            alert("✅ SOS sent to " + data.to);
+            alert(" SOS sent to " + data.to);
           } else {
-            alert("❌ Failed: " + data.msg);
+            alert(" Failed: " + data.msg);
           }
         })
-        .catch(err => alert("❌ Error: " + err));
+        .catch(err => alert(" Error: " + err));
       });
     } else {
       alert("Geolocation not supported on this device.");

@@ -33,6 +33,8 @@ app.config["SECRET_KEY"] = secret_key
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+SOS_ALERTS = []
+
 # Init DB
 db.init_app(app)
 with app.app_context():
@@ -245,7 +247,7 @@ def driver_dashboard():
             driver.is_available = not driver.is_available
             db.session.commit()
             flash(f"Availability set to {driver.is_available}")
-    return render_template("driver_dashboard.html", driver=driver)
+    return render_template("driver_dashboard.html", driver=driver, sos_alerts=SOS_ALERTS)
 
 # -------------------------------
 # LOGOUT
@@ -371,6 +373,7 @@ def delete_hospital(hospital_id):
 # -------------------------------
 @app.route("/api/send-sos", methods=["POST"])
 def api_send_sos():
+    from datetime import datetime
     data = request.json or request.form or {}
     lat = parse_coord(data.get("lat"))
     lon = parse_coord(data.get("lon"))
@@ -383,14 +386,19 @@ def api_send_sos():
         return jsonify({"ok": False, "msg": "No available driver right now"})
 
     location_url = f"https://www.openstreetmap.org/?mlat={lat}&mlon={lon}&zoom=15"
-    subject = "🚨 SOS Alert"
+    subject = "SOS Alert"
     body = f"A patient needs urgent help!\n\nLocation: {location_url}\n\nDriver Contact: {driver.phone}"
 
-    success = send_email_notification(driver.email, subject, body)
-    if success:
-        return jsonify({"ok": True, "to": driver.email})
-    else:
-        return jsonify({"ok": False, "msg": "Failed to send email"})
+    SOS_ALERTS.insert(0, {
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "lat": lat,
+        "lon": lon,
+        "map_url": location_url,
+        "driver_email": driver.email
+    })
+
+    send_email_notification(driver.email, subject, body)
+    return jsonify({"ok": True, "to": f"{driver.name} ({driver.email})"})
 
 # -------------------------------
 # Patient Symptom Input

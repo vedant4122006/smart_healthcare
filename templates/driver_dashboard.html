@@ -2,105 +2,50 @@
 {% block content %}
 <div class="dashboard-container">
   <div class="dashboard-card">
-    <h1>🚑 Driver Dashboard</h1>
-
+    <h1>Driver Dashboard</h1>
     <div class="driver-info">
       <p><strong>Name:</strong> {{ driver.name }}</p>
       <p><strong>Email:</strong> {{ driver.email }}</p>
       <p><strong>Phone:</strong> {{ driver.phone }}</p>
       <p>
-        <strong>Status:</strong> 
+        <strong>Status:</strong>
         <span class="status {{ 'available' if driver.is_available else 'busy' }}">
-          {{ '✅ Available' if driver.is_available else '❌ Busy' }}
+          {{ 'Available' if driver.is_available else 'Busy' }}
         </span>
       </p>
     </div>
-
     <form method="POST">
       <button name="action" value="toggle" type="submit" class="toggle-btn">
-        {% if driver.is_available %}🚫 Set Busy{% else %}✅ Set Available{% endif %}
+        {% if driver.is_available %}Set Busy{% else %}Set Available{% endif %}
       </button>
     </form>
+
+    <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ddd;">
+    <h2>Incoming Emergency SOS Alerts</h2>
+    {% if sos_alerts %}
+      <div style="text-align:left;">
+        {% for alert in sos_alerts %}
+          <div style="background:#fff3cd; border:1px solid #ffeeba; padding:12px; border-radius:8px; margin-bottom:10px;">
+            <p style="margin:4px 0;"><strong>Time:</strong> {{ alert.time }}</p>
+            <p style="margin:4px 0;"><strong>Coordinates:</strong> {{ alert.lat }}, {{ alert.lon }}</p>
+            <a href="{{ alert.map_url }}" target="_blank" style="display:inline-block; margin-top:6px; background:#dc3545; color:#fff; padding:6px 12px; border-radius:5px; text-decoration:none; font-weight:bold;">Open Patient Location</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color:#666;">No active SOS alerts right now.</p>
+    {% endif %}
 
     <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
   </div>
 </div>
-
 <style>
-  .dashboard-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 40px;
-  }
-
-  .dashboard-card {
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-    width: 400px;
-    text-align: center;
-    animation: fadeIn 0.8s ease-in-out;
-  }
-
-  h1 {
-    margin-bottom: 20px;
-    color: #007bff;
-  }
-
-  .driver-info p {
-    margin: 10px 0;
-    font-size: 15px;
-    color: #333;
-  }
-
-  .status.available {
-    color: green;
-    font-weight: bold;
-  }
-
-  .status.busy {
-    color: red;
-    font-weight: bold;
-  }
-
-  .toggle-btn {
-    margin-top: 15px;
-    width: 100%;
-    padding: 12px;
-    background: #28a745;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-
-  .toggle-btn:hover {
-    background: #218838;
-  }
-
-  .logout-btn {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 10px 16px;
-    background: #dc3545;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: bold;
-    transition: background 0.3s ease;
-  }
-
-  .logout-btn:hover {
-    background: #c82333;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  .dashboard-container { display: flex; justify-content: center; margin-top: 30px; }
+  .dashboard-card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.12); width: 500px; text-align: center; }
+  h1, h2 { color: #007bff; }
+  .status.available { color: green; font-weight: bold; }
+  .status.busy { color: red; font-weight: bold; }
+  .toggle-btn { margin-top: 15px; width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+  .logout-btn { display: inline-block; margin-top: 20px; padding: 10px 16px; background: #dc3545; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
 </style>
 {% endblock %}

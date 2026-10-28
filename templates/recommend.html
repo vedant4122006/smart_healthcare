@@ -12,14 +12,14 @@
           <p><strong>Machines:</strong> {{ h.machines }}</p>
 
           {% if h.distance %}
-            <p><strong>📍 Distance:</strong> {{ "%.2f"|format(h.distance) }} km</p>
+            <p><strong> Distance:</strong> {{ "%.2f"|format(h.distance) }} km</p>
           {% else %}
-            <p><strong>📍 Distance:</strong> Unknown</p>
+            <p><strong> Distance:</strong> Unknown</p>
           {% endif %}
 
           <div class="actions">
             <a href="{{ url_for('hospital_detail', hospital_id=h.id, lat=patient_lat, lon=patient_lon) }}" class="btn-detail">ℹ View Details</a>
-            <a href="{{ url_for('map_view', hospital_id=h.id, lat=patient_lat, lon=patient_lon) }}" target="_blank" class="btn-map">🗺 View on Map</a>
+            <a href="{{ url_for('map_view', hospital_id=h.id, lat=patient_lat, lon=patient_lon) }}"  class="btn-map"> View on Map</a>
           </div>
         </div>
       {% endfor %}

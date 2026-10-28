@@ -8,7 +8,7 @@ def send_email_notification(to_email, subject, body):
     Robust Gmail SMTP sender supporting both Port 587 (STARTTLS) and Port 465 (SSL)
     """
     if os.getenv("SEND_EMAIL", "false").lower() not in ("true", "1", "yes"):
-        print("ℹ️ Email notifications are disabled in environment.")
+        print("ℹ Email notifications are disabled in environment.")
         return True  # Return True so SOS doesn't break if email is intentionally toggled off
 
     host = os.getenv("EMAIL_HOST", "smtp.gmail.com")
@@ -17,11 +17,11 @@ def send_email_notification(to_email, subject, body):
     password = os.getenv("EMAIL_PASS")
 
     if not user or not password:
-        print("❌ Email credentials missing in .env file.")
+        print(" Email credentials missing in .env file.")
         return False
 
     try:
-        print(f"🔐 Connecting to Gmail SMTP ({host}:{port})...")
+        print(f" Connecting to Gmail SMTP ({host}:{port})...")
         
         # Handle port-specific connection security
         if port == 465:
@@ -43,9 +43,9 @@ def send_email_notification(to_email, subject, body):
 
         server.sendmail(user, to_email, msg.as_string())
         server.quit()
-        print("✅ Emergency SOS Email sent successfully!")
+        print(" Emergency SOS Email sent successfully!")
         return True
 
     except Exception as e:
-        print(f"❌ Email failed: {str(e)}")
+        print(f" Email failed: {str(e)}")
         return False

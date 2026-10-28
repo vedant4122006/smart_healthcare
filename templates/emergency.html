@@ -71,11 +71,11 @@
     .then(res => res.json())
     .then(data => {
       if (data.ok) {
-        document.getElementById("statusMsg").innerText = "✅ SOS sent to ambulance driver (" + data.to + ")!";
-        alert("✅ SOS Alert Dispatched Successfully to " + data.to);
+        document.getElementById("statusMsg").innerText = " SOS sent to ambulance driver (" + data.to + ")!";
+        alert(" SOS Alert Dispatched Successfully to " + data.to);
       } else {
-        document.getElementById("statusMsg").innerText = "❌ Failed: " + data.msg;
-        alert("⚠️ Could not send SOS: " + data.msg);
+        document.getElementById("statusMsg").innerText = " Failed: " + data.msg;
+        alert(" Could not send SOS: " + data.msg);
       }
     })
     .catch(err => alert("âŒ Error: " + err));

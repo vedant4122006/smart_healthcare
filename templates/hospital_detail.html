@@ -1,25 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="hospital-detail">
-  <h1>🏥 {{ hospital.name }}</h1>
+  <h1>{{ hospital.name }}</h1>
 
   <div class="info-card">
-    <h2>🩺 Specialization</h2>
+    <h2>Specialization</h2>
     <p>{{ hospital.specialization }}</p>
   </div>
 
   <div class="info-card">
-    <h2>🛠️ Available Machines & Facilities</h2>
+    <h2>Available Machines & Facilities</h2>
     <p>{{ hospital.machines or 'Standard Emergency Facilities' }}</p>
   </div>
 
   <div class="info-card">
-    <h2>📍 Location ({{ hospital.latitude }}, {{ hospital.longitude }})</h2>
+    <h2>Location ({{ hospital.latitude }}, {{ hospital.longitude }})</h2>
     <div id="map"></div>
   </div>
 
   <div style="text-align: center; margin-top: 20px; display: flex; gap: 12px; justify-content: center;">
-    <a href="{{ url_for('map_view', hospital_id=hospital.id) }}" class="btn-back" style="background:#28a745;">🗺️ Route Map View</a>
+    <a href="{{ url_for('map_view', hospital_id=hospital.id) }}" class="btn-back" style="background:#28a745;"> Route Map View</a>
     <a href="{{ url_for('hospital_list') }}" class="btn-back">⬅ Back to Hospital List</a>
   </div>
 </div>
@@ -35,7 +35,7 @@
     }).addTo(map);
 
     L.marker([lat, lon]).addTo(map)
-      .bindPopup("🏥 {{ hospital.name }}")
+      .bindPopup(" {{ hospital.name }}")
       .openPopup();
   });
 </script>
