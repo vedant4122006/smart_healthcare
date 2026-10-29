@@ -13,8 +13,8 @@ with app.app_context():
     db.create_all()
 
     # 1. See
-    admin_email = os.getenv('ADMIN_EMAIL')
-    admin_pass = os.getenv('ADMIN_PASS')
+    admin_email = os.getenv('ADMIN_EMAIL', 'admin@smarthealthcare.com')
+    admin_pass = os.getenv('ADMIN_PASS', 'admin123')
     if admin_email and admin_pass:
         admin = Admin.query.filter_by(email=admin_email).first()
         if not admin:
@@ -23,8 +23,8 @@ with app.app_context():
             db.session.add(admin)
             print(f'[OK] Admin ready: {admin_email}')
 
-    driver_email = os.getenv('DRIVER_EMAIL')
-    driver_pass = os.getenv('DRIVER_PASS')
+    driver_email = os.getenv('DRIVER_EMAIL', 'driver@smarthealthcare.com')
+    driver_pass = os.getenv('DRIVER_PASS', 'driver123')
     if driver_email and driver_pass:
         # Remove old misconfigured driver email if present
         Driver.query.filter(Driver.email != driver_email).delete()
@@ -43,8 +43,8 @@ with app.app_context():
             driver.is_available = True
         print(f'[OK] Driver ready: {driver_email}')
 
-    doctor_email = os.getenv('DOCTOR_EMAIL')
-    doctor_pass = os.getenv('DOCTOR_PASS')
+    doctor_email = os.getenv('DOCTOR_EMAIL', 'doctor@smarthealthcare.com')
+    doctor_pass = os.getenv('DOCTOR_PASS', 'doctor123')
     if doctor_email and doctor_pass:
         doc = Doctor.query.filter_by(email=doctor_email).first()
         if not doc:

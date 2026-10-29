@@ -4,3 +4,4 @@ geopy
 requests
 python-dotenv
 rapidfuzz
+gunicorn

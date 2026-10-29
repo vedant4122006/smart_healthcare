@@ -1,0 +1,17 @@
+services:
+  web:
+    build: .
+    container_name: smart_healthcare_app
+    ports:
+      - "5000:5000"
+    environment:
+      - SEND_EMAIL=false
+      - SECRET_KEY=docker-demo-secret-key-smart-healthcare
+      - FLASK_DEBUG=false
+      - ADMIN_EMAIL=admin@smarthealthcare.com
+      - ADMIN_PASS=admin123
+      - DRIVER_EMAIL=driver@smarthealthcare.com
+      - DRIVER_PASS=driver123
+      - DOCTOR_EMAIL=doctor@smarthealthcare.com
+      - DOCTOR_PASS=doctor123
+    restart: unless-stopped
