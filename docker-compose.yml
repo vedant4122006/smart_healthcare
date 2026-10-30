@@ -1,17 +1,31 @@
 services:
   web:
     build: .
-    container_name: smart_healthcare_app
+    container_name: smart_healthcare_CONTAINER
     ports:
       - "5000:5000"
+    #  MOUNT YOUR CODE: Mirrors Windows files straight into the container
+    volumes:
+      # 1. The Mirror: Links your Python code, .env, and database changes instantly
+      - .:/app          
+
+      # 2. The Shield: Blocks the heavy Windows venv from slowing down Linux
+      - /app/venv       
+
+      # 3. The Cache Shield: Blocks internal Python cache files from clashing
+      - /app/__pycache__ 
+
     environment:
       - SEND_EMAIL=false
       - SECRET_KEY=docker-demo-secret-key-smart-healthcare
-      - FLASK_DEBUG=false
+      - FLASK_DEBUG=true  # 2. Set to true for live code reloads
       - ADMIN_EMAIL=admin@smarthealthcare.com
       - ADMIN_PASS=admin123
       - DRIVER_EMAIL=driver@smarthealthcare.com
       - DRIVER_PASS=driver123
       - DOCTOR_EMAIL=doctor@smarthealthcare.com
       - DOCTOR_PASS=doctor123
+      - SQL_ECHO=false
+    # 3. ADD THE GUNICORN --reload FLAG HERE:
+    command: sh -c "python seed_admin.py && gunicorn -w 1 --threads 4 --reload -b 0.0.0.0:5000 app:app"
     restart: unless-stopped

@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["sh", "-c", "python seed_admin.py && python app.py"]
+CMD ["sh", "-c", "python seed_admin.py && gunicorn -w 1 --threads 4 -b 0.0.0.0:${PORT:-5000} app:app"]

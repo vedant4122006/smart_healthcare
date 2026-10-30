@@ -33,6 +33,9 @@ app.config["SECRET_KEY"] = secret_key
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+# This sets it to True ONLY if you explicitly add SQL_ECHO=true in Docker
+app.config["SQLALCHEMY_ECHO"] = os.getenv("SQL_ECHO", "False").lower() == "true"
+
 SOS_ALERTS = []
 
 # Init DB
@@ -548,4 +551,5 @@ def emergency():
 # -------------------------------
 if __name__ == "__main__":
     debug_mode = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
-    app.run(debug=debug_mode, host="0.0.0.0", port=5000)
+    port = int(os.getenv("PORT", 5000))
+    app.run(debug=debug_mode, host="0.0.0.0", port=port)
