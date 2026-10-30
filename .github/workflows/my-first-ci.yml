@@ -1,0 +1,19 @@
+name: My First CI Test
+
+# This tells GitHub WHEN to run the script (every time someone pushes to the main branch)
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  explore-ci:
+    runs-on: ubuntu-latest # GitHub provides a free temporary Linux machine to run this
+    steps:
+      - name: Check out your repository code
+        uses: actions/checkout@v4
+
+      - name: Say Hello
+        run: echo "Hello! The CI script is running successfully."
+
+      - name: Look at project files
+        run: ls -la
