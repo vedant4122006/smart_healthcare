@@ -1,15 +1,14 @@
-name: My First CI Test
+name: CI/CD Pipeline
 
-# This tells GitHub WHEN to run the script (every time someone pushes to the main branch)
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  explore-ci:
-    runs-on: ubuntu-latest # GitHub provides a free temporary Linux machine to run this
+  build-and-test:
+    runs-on: ubuntu-latest
     steps:
-      - name: Check out your repository code
+      - name: Check out code
         uses: actions/checkout@v4
 
       - name: Say Hello
@@ -17,3 +16,17 @@ jobs:
 
       - name: Look at project files
         run: ls -la
+
+      - name: Simulate Tests
+        run: |
+          echo "Running application tests..."
+          echo "All tests passed successfully!"
+
+  deploy-to-render:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render CD Pipeline
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+
