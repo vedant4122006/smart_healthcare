@@ -542,7 +542,10 @@ def map_view(hospital_id):
         patient_lat=patient_lat,
         patient_lon=patient_lon
     )
-
+# -------------------------------
+@app.route("/health")
+def health():
+    return jsonify({"status": "healthy", "service": "smart-healthcare"}), 200
 # -------------------------------
 @app.route("/emergency")
 def emergency():
